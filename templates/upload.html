@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Test - Mydeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-blue-600 text-white p-4 flex justify-between items-center">
+        <h1 class="text-3xl font-bold">Upload Test Video</h1>
+        <a href="/dashboard" class="text-white hover:underline">Back to Dashboard</a>
+    </header>
+    <main class="max-w-md mx-auto mt-8 p-4">
+        <form method="POST" enctype="multipart/form-data" id="uploadForm" class="bg-white rounded-lg shadow-lg p-6 space-y-4">
+            <div>
+                <label for="test_type" class="block text-gray-700">Test Type</label>
+                <select id="test_type" name="test_type" class="w-full p-2 border rounded" required>
+                    <option value="vertical_jump">Vertical Jump</option>
+                    <option value="sit_ups">Sit-Ups</option>
+                    <option value="shuttle_run">Shuttle Run</option>
+                </select>
+            </div>
+            <div>
+                <label for="video" class="block text-gray-700">Upload Video</label>
+                <input type="file" id="video" name="video" accept="video/*" class="w-full p-2 border rounded" required>
+            </div>
+            <input type="hidden" id="sit_ups_count" name="sit_ups_count">
+            <input type="hidden" id="vertical_jump_height" name="vertical_jump_height">
+            <input type="hidden" id="shuttle_run_time" name="shuttle_run_time">
+            <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-700 w-full">Submit</button>
+        </form>
+        <p id="analysisMessage" class="text-gray-700 mt-4 hidden">Analyzing video...</p>
+    </main>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            const testType = document.getElementById('test_type').value;
+            const videoInput = document.getElementById('video');
+            const analysisMessage = document.getElementById('analysisMessage');
+            if (testType === 'sit_ups' || testType === 'vertical_jump' || testType === 'shuttle_run') {
+                event.preventDefault();
+                analysisMessage.classList.remove('hidden');
+                
+                const videoFile = videoInput.files[0];
+                if (!videoFile) {
+                    analysisMessage.textContent = 'Error: No video selected.';
+                    return;
+                }
+                
+                const videoElement = document.createElement('video');
+                videoElement.src = URL.createObjectURL(videoFile);
+                
+                try {
+                    await new Promise((resolve, reject) => {
+                        videoElement.onloadedmetadata = () => {
+                            const duration = videoElement.duration; // Duration in seconds
+                            let result;
+                            if (testType === 'sit_ups') {
+                                // 1 sit-up per 2 seconds
+                                result = Math.max(0, Math.floor(duration / 2));
+                                document.getElementById('sit_ups_count').value = result;
+                                analysisMessage.textContent = `Estimated ${result} sit-ups based on video duration.`;
+                            } else if (testType === 'vertical_jump') {
+                                // Estimate height: 10 cm per second, capped at 100 cm
+                                result = Math.min(100, Math.floor(duration * 10));
+                                document.getElementById('vertical_jump_height').value = result;
+                                analysisMessage.textContent = `Estimated ${result} cm vertical jump based on video duration.`;
+                            } else if (testType === 'shuttle_run') {
+                                // Estimate time: 1:1 mapping with video duration
+                                result = duration.toFixed(1);
+                                document.getElementById('shuttle_run_time').value = result;
+                                analysisMessage.textContent = `Estimated ${result} seconds for shuttle run based on video duration.`;
+                            }
+                            console.log(`Test: ${testType}, Duration: ${duration}s, Result: ${result}`);
+                            resolve();
+                        };
+                        videoElement.onerror = () => {
+                            console.error('Error loading video metadata.');
+                            analysisMessage.textContent = 'Error analyzing video.';
+                            reject();
+                        };
+                    });
+                    // Submit the form after analysis
+                    this.submit();
+                } catch (error) {
+                    analysisMessage.textContent = 'Failed to analyze video. Please try again.';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

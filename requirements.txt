@@ -1,0 +1,9 @@
+# requirements.txt
+Flask==3.0.3
+Flask-CORS==4.0.1
+pymongo==4.6.3
+Werkzeug==3.0.3
+python-dotenv==1.0.1
+opencv-python==4.10.0.84  # For basic video processing (mock AI)
+numpy==1.26.4
+gunicorn==21.2.0

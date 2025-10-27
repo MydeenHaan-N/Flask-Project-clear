@@ -1,0 +1,105 @@
+<!-- templates/edit_submission.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Submission - Mydeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-blue-600 text-white p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Edit Submission</h1>
+        <a href="{{ url_for('dashboard') }}" class="text-white hover:underline">Back to Dashboard</a>
+    </header>
+    <main class="max-w-2xl mx-auto mt-8 p-4">
+        <section class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">Edit {{ submission.test_type.replace('_', ' ').title() }} Submission</h2>
+            {% if error %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{{ error }}</div>
+            {% endif %}
+            <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                <!-- Test Type Selection (if allowing change) -->
+                <div>
+                    <label for="test_type" class="block text-sm font-medium text-gray-700 mb-1">Test Type</label>
+                    <select name="test_type" id="test_type" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="vertical_jump" {% if submission.test_type == 'vertical_jump' %}selected{% endif %}>Vertical Jump</option>
+                        <option value="sit_ups" {% if submission.test_type == 'sit_ups' %}selected{% endif %}>Sit-Ups</option>
+                        <option value="shuttle_run" {% if submission.test_type == 'shuttle_run' %}selected{% endif %}>Shuttle Run</option>
+                    </select>
+                </div>
+
+                <!-- Video Upload (Optional: Re-upload if changing) -->
+                <div>
+                    <label for="video" class="block text-sm font-medium text-gray-700 mb-1">New Video (optional)</label>
+                    <input type="file" name="video" id="video" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" accept="video/*">
+                    <p class="text-sm text-gray-500 mt-1">Current video: {{ submission.video_path }}</p>
+                </div>
+
+                <!-- Conditional Fields Based on Test Type -->
+                <!-- Vertical Jump Height -->
+                <div id="vertical-jump-field" class="vertical-jump-field" style="display: {% if submission.test_type == 'vertical_jump' %}block{% else %}none{% endif %}">
+                    <label for="vertical_jump_height" class="block text-sm font-medium text-gray-700 mb-1">Vertical Jump Height (cm)</label>
+                    <input type="number" name="vertical_jump_height" id="vertical_jump_height" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ prefill.get('vertical_jump_height', '') }}" required>
+                </div>
+
+                <!-- Sit-Ups Count (Auto-detected) -->
+                <div id="sit-ups-field" class="sit-ups-field" style="display: {% if submission.test_type == 'sit_ups' %}block{% else %}none{% endif %}">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sit-Ups Count</label>
+                    <p class="text-gray-600">Current: {{ submission.analysis.get('count', 0) }} reps<br><small class="text-gray-500">Will be automatically detected from the video upon update.</small></p>
+                </div>
+
+                <!-- Shuttle Run Time -->
+                <div id="shuttle-run-field" class="shuttle-run-field" style="display: {% if submission.test_type == 'shuttle_run' %}block{% else %}none{% endif %}">
+                    <label for="shuttle_run_time" class="block text-sm font-medium text-gray-700 mb-1">Shuttle Run Time (seconds)</label>
+                    <input type="number" step="0.01" name="shuttle_run_time" id="shuttle_run_time" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ prefill.get('shuttle_run_time', '') }}" required>
+                </div>
+
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-md">Update Submission</button>
+                    <a href="{{ url_for('dashboard') }}" class="bg-gray-500 hover:bg-gray-700 text-white px-6 py-2 rounded-md text-center">Cancel</a>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        // Toggle fields based on test type selection
+        const testTypeSelect = document.getElementById('test_type');
+        const fields = {
+            'vertical_jump': document.querySelector('.vertical-jump-field'),
+            'sit_ups': document.querySelector('.sit-ups-field'),
+            'shuttle_run': document.querySelector('.shuttle-run-field')
+        };
+        const inputs = {
+            'vertical_jump': document.getElementById('vertical_jump_height'),
+            'sit_ups': null,  // No input for sit-ups
+            'shuttle_run': document.getElementById('shuttle_run_time')
+        };
+
+        function updateFields() {
+            // Hide all fields
+            Object.values(fields).forEach(field => {
+                if (field) field.style.display = 'none';
+            });
+            // Reset required for inputs that have them
+            Object.values(inputs).forEach(input => {
+                if (input) input.required = false;
+            });
+            // Show selected field
+            const selectedType = testTypeSelect.value;
+            if (fields[selectedType]) {
+                fields[selectedType].style.display = 'block';
+            }
+            // Set required for inputs
+            if (inputs[selectedType]) {
+                inputs[selectedType].required = true;
+            }
+        }
+
+        testTypeSelect.addEventListener('change', updateFields);
+        // Initial call
+        updateFields();
+    </script>
+</body>
+</html>

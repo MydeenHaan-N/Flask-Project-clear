@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Registration - Mydeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-blue-600 text-white p-4">
+        <h1 class="text-3xl font-bold text-center">Admin Registration</h1>
+    </header>
+    <main class="max-w-md mx-auto mt-8 p-4">
+        <form method="POST" class="bg-white rounded-lg shadow-lg p-6 space-y-4">
+            <div>
+                <label for="username" class="block text-gray-700">Admin Username</label>
+                <input type="text" id="username" name="username" class="w-full p-2 border rounded" required>
+            </div>
+            <div>
+                <label for="password" class="block text-gray-700">Password</label>
+                <input type="password" id="password" name="password" class="w-full p-2 border rounded" required>
+            </div>
+            {% if error %}
+                <p class="text-red-500 text-center">{{ error }}</p>
+            {% endif %}
+            <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-700 w-full">Register</button>
+        </form>
+        <p class="mt-4 text-center">Already have an admin account? <a href="/admin" class="text-blue-500 hover:underline">Login</a></p>
+    </main>
+</body>
+</html>
