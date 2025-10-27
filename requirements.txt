@@ -1,9 +1,10 @@
-# requirements.txt
 Flask==3.0.3
 Flask-CORS==4.0.1
+Flask-PyMongo==3.0.1  # Added: Flask wrapper for PyMongo
 pymongo==4.6.3
 Werkzeug==3.0.3
 python-dotenv==1.0.1
-opencv-python==4.10.0.84  # For basic video processing (mock AI)
+opencv-python==4.10.0.84
+mediapipe==0.10.14  # Added: For pose detection in video analysis
 numpy==1.26.4
 gunicorn==21.2.0
